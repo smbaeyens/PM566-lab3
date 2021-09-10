@@ -1,0 +1,122 @@
+---
+title: "Lab3"
+author: "Sylvia Baeyens"
+date: "9/10/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+```{r, echo= FALSE, include= FALSE}
+#including necessary libraries
+library(data.table)
+library(dplyr)
+library(R.utils)
+```
+
+Initial question= Examine Windspeed & Temp at Station with Highest Elevation
+
+#Reading in Data
+
+```{r}
+#download file ONLY IF it has not been downloaded previously
+if (!file.exists("met_all.gz")) {
+  download.file("https://raw.githubusercontent.com/USCbiostats/data-science-data/master/02_met/met_all.gz", "met_all.gz", method="libcurl", timeout = 60)}
+met <- data.table::fread("met_all.gz")
+```
+
+#Checking dimensions 
+
+```{r}
+dim(met)
+head(met)
+tail(met)
+```
+
+There are 2,377,343 rows & 30 columns in the met dataset.
+
+# Looking at Variables & Key Variables & Data Clean-up
+
+```{r}
+str(met)
+
+table(met$year)
+table(met$day)
+table(met$hour)
+summary(met$temp)
+summary(met$elev)
+summary(met$wind.sp)
+
+#replacing 9999.0 elevation with N//A
+met[met$elev==9999.0] <- NA
+summary(met$elev)
+
+#now the highest elevation is at 4113m
+
+#removing temperatures of -40C
+met <- met[temp>-40]
+met2 <- met[order(temp)]
+head(met2)
+
+#going another step further and removing temperatures less than -15C
+met <- met[temp>-15]
+met2 <- met[order(temp)]
+head(met2)
+```
+
+#Summary Statistics
+
+```{r}
+#examining station with highest elevation
+elev <- met[elev==max(elev)]
+summary(elev)
+
+#correlation between temp & wind speed
+cor(elev$temp, elev$wind.sp, use="complete")
+#correlation between temp & hour
+cor(elev$temp, elev$hour, use="complete")
+#correlation between wind speed & day
+cor(elev$wind.sp, elev$day, use="complete")
+#correlation between wind speed & hour
+cor(elev$wind.sp, elev$hour, use="complete")
+#correlation between temp & day
+cor(elev$temp, elev$day, use="complete")
+
+```
+
+#Exploratory Graphs
+
+```{r}
+hist(met$elev, breaks=100)
+
+hist(met$temp)
+
+hist(met$wind.sp)
+
+#looking for where station with highest elevation is located -> in CO Rocky Mountain Park
+library(leaflet)
+leaflet(elev) %>%
+  addProviderTiles('OpenStreetMap') %>% 
+  addCircles(lat=~lat,lng=~lon, opacity=1, fillOpacity=1, radius=100)
+
+#finding time series of temp and wind speed
+#creating date-time variable
+library(lubridate)
+elev$date <- with(elev, ymd_h(paste(year, month, day, hour, sep= ' ')))
+summary(elev$date)
+elev <- elev[order(date)]
+head(elev)
+
+#time series for temp
+plot(elev$date, elev$temp, type='l')
+
+#time series for wind speed
+plot(elev$date, elev$wind.sp, type='l')
+```
+
+Temperature fluctuates throughout each day, with the maximum (btwn 10 & 15C) and minimum (btwn 2 & 6C) temperatures per day remaining relatively constant between days. It is likely that the max temp each day is around noon and the minimum at midnight, but would need clearer time stamps (including hours) to verify.
+
+Wind changes much more randomly during and between days. It was very windy between August 12th and August 18th and between the 24th and 27th. 
