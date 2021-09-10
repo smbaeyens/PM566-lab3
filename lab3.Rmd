@@ -76,16 +76,14 @@ head(met2)
 elev <- met[elev==max(elev)]
 summary(elev)
 
-#correlation between temp & wind speed
-cor(elev$temp, elev$wind.sp, use="complete")
-#correlation between temp & hour
-cor(elev$temp, elev$hour, use="complete")
-#correlation between wind speed & day
-cor(elev$wind.sp, elev$day, use="complete")
-#correlation between wind speed & hour
-cor(elev$wind.sp, elev$hour, use="complete")
-#correlation between temp & day
-cor(elev$temp, elev$day, use="complete")
+#finding correlations and placing in data table
+met[elev==max(elev,na.rm = TRUE), .(
+  temp_wind = cor(temp, wind.sp, use="complete"),
+  temp_hour = cor(temp, hour, use="complete"),
+  wind_day = cor(wind.sp, day, use="complete"),
+  wind_hour = cor(wind.sp, hour, use="complete"),
+  temp_day = cor(temp, day, use="complete")
+)]
 
 ```
 
