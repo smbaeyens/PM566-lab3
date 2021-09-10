@@ -31,12 +31,12 @@ met <- data.table::fread("met_all.gz")
 #Checking dimensions 
 
 ```{r}
-dim(met)
+x= dim(met)
 head(met)
 tail(met)
 ```
 
-There are 2,377,343 rows & 30 columns in the met dataset.
+There are `r x[1]` rows & `r x[2]` columns in the met dataset.
 
 # Looking at Variables & Key Variables & Data Clean-up
 
@@ -53,9 +53,11 @@ summary(met$wind.sp)
 #replacing 9999.0 elevation with N//A
 met[met$elev==9999.0] <- NA
 summary(met$elev)
+```
 
-#now the highest elevation is at 4113m
+The highest elevation is at `r max(met$elev, na.rm = TRUE)` m. 
 
+```{r}
 #removing temperatures of -40C
 met <- met[temp>-40]
 met2 <- met[order(temp)]
