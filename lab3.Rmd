@@ -2,7 +2,8 @@
 title: "Lab3"
 author: "Sylvia Baeyens"
 date: "9/10/2021"
-output: html_document
+output: github_document
+always_allow_html: true
 ---
 
 ```{r setup, include=FALSE}
